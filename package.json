@@ -1,0 +1,28 @@
+{
+  "name": "ultimate-arcade-client-sdk",
+  "version": "0.0.1",
+  "description": "Ultimate Arcade JS Game Client SDK",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node src/index.ts",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UltimateTournament/ArcadeJSClientSDK.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UltimateTournament/ArcadeJSClientSDK/issues"
+  },
+  "homepage": "https://github.com/UltimateTournament/ArcadeJSClientSDK#readme",
+  "devDependencies": {
+    "@types/node": "^17.0.41",
+    "nodemon": "^2.0.16",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.3"
+  }
+}
