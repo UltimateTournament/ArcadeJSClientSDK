@@ -5,7 +5,6 @@ export default class ArcadeClientSDK {
 
   sessionToken: string = ""
   url = "https://userapi.ultimatearcade.io"
-  gotEndResponse = false
 
   constructor(options?: {
     baseDomain?: string
@@ -19,10 +18,6 @@ export default class ArcadeClientSDK {
       if (e.data.token) {
         // Send back confirmation regardless
         window.top?.postMessage({msg: 'gotToken'}, '*')
-      }
-      if (e.data.msg && e.data.msg === "gameOver") {
-        // The parent window confirming game over received
-        this.gotEndResponse = true
       }
     }
 
@@ -92,15 +87,6 @@ export default class ArcadeClientSDK {
    * Tells the Ultimate Arcade parent window that the game session has ended, and the game client can be removed from the page and the results shown.
    */
   async gameOver(): Promise<void> {
-    while (!this.gotEndResponse) {
-      window.top?.postMessage({msg: 'gameOver'}, '*')
-
-      // Sleep 50ms before checking again
-      await new Promise((r) => {
-        setTimeout(() => {
-          r(null)
-        }, 50)
-      })
-    }
+    window.top?.postMessage({msg: 'gameOver'}, '*')
   }
 }
