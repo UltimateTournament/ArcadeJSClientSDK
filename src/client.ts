@@ -17,7 +17,7 @@ export default class ArcadeClientSDK {
       }
       if (e.data.token) {
         // Send back confirmation regardless
-        window.top?.postMessage({msg: 'gotToken'}, '*')
+        window.top?.postMessage({ msg: 'gotToken', token: this.sessionToken }, '*')
       }
     }
 
@@ -87,6 +87,6 @@ export default class ArcadeClientSDK {
    * Tells the Ultimate Arcade parent window that the game session has ended, and the game client can be removed from the page and the results shown.
    */
   async gameOver(): Promise<void> {
-    window.top?.postMessage({msg: 'gameOver'}, '*')
+    window.top?.postMessage({ msg: 'gameOver', token: this.sessionToken }, '*')
   }
 }
