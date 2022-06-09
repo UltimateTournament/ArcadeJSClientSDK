@@ -1,5 +1,5 @@
 {
-  "name": "@ultimatearcade/ultimate-arcade-client-sdk",
+  "name": "@ultimatearcade/client-sdk",
   "version": "0.0.1",
   "description": "Ultimate Arcade JS Game Client SDK",
   "main": "index.js",
