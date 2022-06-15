@@ -5,7 +5,13 @@
   "main": "build/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc",
+    "release": "standard-version",
+    "release:major": "standard-version --release-as major",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch",
+    "release:alpha": "standard-version --prerelease alpha",
+    "release:beta": "standard-version --prerelease beta"
   },
   "repository": {
     "type": "git",
@@ -18,10 +24,11 @@
     "url": "https://github.com/UltimateTournament/ArcadeJSClientSDK/issues"
   },
   "homepage": "https://github.com/UltimateTournament/ArcadeJSClientSDK#readme",
-  "devDependencies": {
-    "typescript": "^4.7.3"
-  },
   "dependencies": {
     "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "standard-version": "^9.2.0",
+    "typescript": "^4.7.3"
   }
 }
