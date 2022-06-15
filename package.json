@@ -2,10 +2,9 @@
   "name": "@ultimatearcade/client-sdk",
   "version": "0.0.2",
   "description": "Ultimate Arcade JS Game Client SDK",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node src/index.ts",
     "build": "tsc"
   },
   "repository": {
@@ -20,9 +19,6 @@
   },
   "homepage": "https://github.com/UltimateTournament/ArcadeJSClientSDK#readme",
   "devDependencies": {
-    "@types/node": "^17.0.41",
-    "nodemon": "^2.0.16",
-    "ts-node": "^10.8.1",
     "typescript": "^4.7.3"
   },
   "dependencies": {

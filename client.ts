@@ -3,23 +3,23 @@ import axios from 'axios'
 
 export default class ArcadeClientSDK {
 
-  sessionToken: string = ""
-  url = "https://userapi.ultimatearcade.io"
+  private readonly gotSession: ((r: string | PromiseLike<string>) => void)
+  private readonly sessionToken: Promise<string>
+  private url = "https://userapi.ultimatearcade.io"
 
   constructor(options?: {
     baseDomain?: string
   }) {
+    let gs: ((r: string | PromiseLike<string>) => void)
+    this.sessionToken = new Promise<string>((resolve)=> gs=resolve)
+    this.gotSession = gs!
     // Register listener for iframe messaging
     window.onmessage = (e) => {
-      // Only set this once
-      if (this.sessionToken === "" && e.data.token) {
-        this.sessionToken = e.data.token
-      }
       if (e.data.token) {
-        // Send back confirmation regardless
-        window.top?.postMessage({ msg: 'gotToken', token: this.sessionToken }, '*')
+        this.gotSession(e.data.token)
       }
     }
+    window.top?.postMessage({ msg: 'requestToken' }, '*')
 
     if (options?.baseDomain) {
       this.url = `https://userapi.${options.baseDomain}`
@@ -29,16 +29,14 @@ export default class ArcadeClientSDK {
   /**
    * Fetches the information about the game session, most importantly the address of the game server to connect to
    */
-  getSessionInfo(): SessionInfo {
-    if (this.sessionToken === "") {
-      throw new Error("parent page not ready yet, try again in a bit")
-    }
-
+  async getSessionInfo(): Promise<SessionInfo> {
+    const token = await this.sessionToken
     // Decode the JWT
-    const decoded = JSON.parse(Buffer.from(this.sessionToken.split(".")[1], "base64").toString())
+    const decoded = JSON.parse(atob(token.split(".")[1]))
 
     return {
-      server_address: decoded.addr
+      server_address: decoded.addr,
+      player_token: token,
     }
   }
 
@@ -60,7 +58,7 @@ export default class ArcadeClientSDK {
         }
         const res = await axios.post(this.url+'/games/player-profile', {}, {
           headers: {
-            'Authorization': `Bearer ${this.sessionToken}`
+            'Authorization': `Bearer ${await this.sessionToken}`
           }
         })
         statuscode = res.status
@@ -87,6 +85,6 @@ export default class ArcadeClientSDK {
    * Tells the Ultimate Arcade parent window that the game session has ended, and the game client can be removed from the page and the results shown.
    */
   async gameOver(): Promise<void> {
-    window.top?.postMessage({ msg: 'gameOver', token: this.sessionToken }, '*')
+    window.top?.postMessage({ msg: 'gameOver', token: await this.sessionToken }, '*')
   }
 }
