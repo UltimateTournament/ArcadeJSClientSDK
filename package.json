@@ -6,12 +6,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "release": "standard-version",
-    "release:major": "standard-version --release-as major",
-    "release:minor": "standard-version --release-as minor",
-    "release:patch": "standard-version --release-as patch",
-    "release:alpha": "standard-version --prerelease alpha",
-    "release:beta": "standard-version --prerelease beta"
+    "build:clean": "rm -rf build && npm run build",
+    "release": "npm run build:clean && standard-version",
+    "release:major": "npm run build:clean && standard-version --release-as major",
+    "release:minor": "npm run build:clean && standard-version --release-as minor",
+    "release:patch": "npm run build:clean && standard-version --release-as patch",
+    "release:alpha": "npm run build:clean && standard-version --prerelease alpha",
+    "release:beta": "npm run build:clean && standard-version --prerelease beta"
   },
   "repository": {
     "type": "git",
