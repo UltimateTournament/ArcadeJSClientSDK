@@ -1,7 +1,23 @@
 import { PlayerInfo, SessionInfo } from "./types";
 import axios from 'axios'
 
-export default class ArcadeClientSDK {
+export interface ArcadeClientSDK {
+  /**
+   * Fetches the information about the game session, most importantly the address of the game server to connect to
+   */
+  getSessionInfo(): Promise<SessionInfo>
+
+  /**
+   * Fetches profile information about the player, like their display name
+   */
+  getPlayerProfile(): Promise<PlayerInfo>
+  /**
+   * Tells the Ultimate Arcade parent window that the game session has ended, and the game client can be removed from the page and the results shown.
+   */
+  gameOver(): Promise<void>
+}
+
+export class arcadeClientSDK {
 
   private readonly gotSession: ((r: string | PromiseLike<string>) => void)
   private readonly sessionToken: Promise<string>
@@ -11,7 +27,7 @@ export default class ArcadeClientSDK {
     baseDomain?: string
   }) {
     let gs: ((r: string | PromiseLike<string>) => void)
-    this.sessionToken = new Promise<string>((resolve)=> gs=resolve)
+    this.sessionToken = new Promise<string>((resolve) => gs = resolve)
     this.gotSession = gs!
     // Register listener for iframe messaging
     window.onmessage = (e) => {
@@ -26,9 +42,6 @@ export default class ArcadeClientSDK {
     }
   }
 
-  /**
-   * Fetches the information about the game session, most importantly the address of the game server to connect to
-   */
   async getSessionInfo(): Promise<SessionInfo> {
     const token = await this.sessionToken
     // Decode the JWT
@@ -40,9 +53,6 @@ export default class ArcadeClientSDK {
     }
   }
 
-  /**
-   * Fetches profile information about the player, like their display name
-   */
   async getPlayerProfile(): Promise<PlayerInfo> {
     try {
       let statuscode = 0
@@ -56,7 +66,7 @@ export default class ArcadeClientSDK {
             }, 200 * retryCount)
           })
         }
-        const res = await axios.post(this.url+'/games/player-profile', {}, {
+        const res = await axios.post(this.url + '/games/player-profile', {}, {
           headers: {
             'Authorization': `Bearer ${await this.sessionToken}`
           }
@@ -81,9 +91,6 @@ export default class ArcadeClientSDK {
     }
   }
 
-  /**
-   * Tells the Ultimate Arcade parent window that the game session has ended, and the game client can be removed from the page and the results shown.
-   */
   async gameOver(): Promise<void> {
     window.top?.postMessage({ msg: 'gameOver', token: await this.sessionToken }, '*')
   }

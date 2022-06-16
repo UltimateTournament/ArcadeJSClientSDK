@@ -7,6 +7,7 @@ export default class Mock {
   constructor(options?: {
     baseDomain?: string
   }) {
+    console.log("UA SDK running in mock mode")
     const tokenKey = "ua.mock.token"
     let lsToken = window.localStorage.getItem(tokenKey)
     if (!lsToken) {
