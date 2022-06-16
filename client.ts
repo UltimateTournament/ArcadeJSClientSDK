@@ -66,7 +66,7 @@ export class arcadeClientSDK {
             }, 200 * retryCount)
           })
         }
-        const res = await axios.post(this.url + '/games/player-profile', {}, {
+        const res = await axios.get(this.url + '/games/player-profile', {
           headers: {
             'Authorization': `Bearer ${await this.sessionToken}`
           }
