@@ -34,4 +34,8 @@ export default class Mock {
   async gameOver(): Promise<void> {
     alert("game over! close your tab")
   }
+
+  async reportErrorAndClose(reason: string): Promise<void> {
+    alert(`game failed! '${reason}' close your tab`)
+  }
 }

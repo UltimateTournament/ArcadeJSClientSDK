@@ -15,24 +15,33 @@ export interface ArcadeClientSDK {
    * Tells the Ultimate Arcade parent window that the game session has ended, and the game client can be removed from the page and the results shown.
    */
   gameOver(): Promise<void>
+  /**
+   * Tells the Ultimate Arcade parent window that the game session cannot continue, and the game client can be removed from the page.
+   * 
+   * If a player has already joined a game, this method will not release them, but it gives a better experience to players
+   * when the game encounters unresolvable errors like permanent network connection loss.
+   */
+  reportErrorAndClose(reason: string): Promise<void>
+}
+
+function newPromise<T>() {
+  let handler: ((r: T | PromiseLike<T>) => void)
+  let prom = new Promise<T>((resolve) => handler = resolve)
+  return { prom, resolve: handler! }
 }
 
 export class arcadeClientSDK {
 
-  private readonly gotSession: ((r: string | PromiseLike<string>) => void)
-  private readonly sessionToken: Promise<string>
+  private readonly sessionToken = newPromise<string>()
   private url = "https://userapi.ultimatearcade.io"
 
   constructor(options?: {
     baseDomain?: string
   }) {
-    let gs: ((r: string | PromiseLike<string>) => void)
-    this.sessionToken = new Promise<string>((resolve) => gs = resolve)
-    this.gotSession = gs!
     // Register listener for iframe messaging
     window.onmessage = (e) => {
       if (e.data.token) {
-        this.gotSession(e.data.token)
+        this.sessionToken.resolve(e.data.token)
       }
     }
     window.top?.postMessage({ msg: 'requestToken' }, '*')
@@ -68,7 +77,7 @@ export class arcadeClientSDK {
         }
         const res = await axios.get(this.url + '/games/player-profile', {
           headers: {
-            'Authorization': `Bearer ${await this.sessionToken}`
+            'Authorization': `Bearer ${await this.sessionToken.prom}`
           }
         })
         statuscode = res.status
@@ -92,6 +101,10 @@ export class arcadeClientSDK {
   }
 
   async gameOver(): Promise<void> {
-    window.top?.postMessage({ msg: 'gameOver', token: await this.sessionToken }, '*')
+    window.top?.postMessage({ msg: 'gameOver', token: await this.sessionToken.prom }, '*')
+  }
+
+  async reportErrorAndClose(reason: string): Promise<void> {
+    window.top?.postMessage({ msg: 'gameError', reason, token: await this.sessionToken.prom }, '*')
   }
 }
