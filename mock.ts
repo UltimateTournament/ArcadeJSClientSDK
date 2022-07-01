@@ -1,6 +1,7 @@
+import { ArcadeClientSDK } from "./client";
 import { PlayerInfo, SessionInfo } from "./types";
 
-export default class Mock {
+export default class Mock implements ArcadeClientSDK {
 
   private token: string;
 
@@ -17,10 +18,16 @@ export default class Mock {
     this.token = lsToken
   }
 
+  storeSettings(settings: Record<string, any>): void {
+    window.localStorage.setItem("game-settings", JSON.stringify(settings))
+  }
+
   async getSessionInfo(): Promise<SessionInfo> {
+    let settings = JSON.parse(window.localStorage.getItem("game-settings") ?? "{}")
     return {
       server_address: window.location.host,
       player_token: this.token,
+      settings,
     }
   }
 

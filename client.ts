@@ -22,6 +22,10 @@ export interface ArcadeClientSDK {
    * when the game encounters unresolvable errors like permanent network connection loss.
    */
   reportErrorAndClose(reason: string): Promise<void>
+  /**
+   * Store game-specific settings that are restored across sessions. Must not be used to change game behavior.
+   */
+  storeSettings(settings: Record<string, any>): void
 }
 
 function newPromise<T>() {
@@ -30,9 +34,10 @@ function newPromise<T>() {
   return { prom, resolve: handler! }
 }
 
-export class arcadeClientSDK {
+export class arcadeClientSDK implements ArcadeClientSDK {
 
   private readonly sessionToken = newPromise<string>()
+  private readonly settings = newPromise<Record<string, any>>()
   private url = "https://userapi.ultimatearcade.io"
 
   constructor(options?: {
@@ -40,11 +45,15 @@ export class arcadeClientSDK {
   }) {
     // Register listener for iframe messaging
     window.onmessage = (e) => {
-      if (e.data.token) {
+      if (e.data.msg === 'settings') {
+        this.settings.resolve(JSON.parse(e.data.settings))
+      }
+      else if (e.data.token) {
         this.sessionToken.resolve(e.data.token)
       }
     }
     window.top?.postMessage({ msg: 'requestToken' }, '*')
+    window.top?.postMessage({ msg: 'requestSettings' }, '*')
 
     if (options?.baseDomain) {
       this.url = `https://userapi.${options.baseDomain}`
@@ -52,13 +61,15 @@ export class arcadeClientSDK {
   }
 
   async getSessionInfo(): Promise<SessionInfo> {
-    const token = await this.sessionToken
+    const token = await this.sessionToken.prom
+    const settings = await this.settings.prom
     // Decode the JWT
     const decoded = JSON.parse(atob(token.split(".")[1]))
 
     return {
       server_address: decoded.addr,
       player_token: token,
+      settings,
     }
   }
 
@@ -107,4 +118,9 @@ export class arcadeClientSDK {
   async reportErrorAndClose(reason: string): Promise<void> {
     window.top?.postMessage({ msg: 'gameError', reason, token: await this.sessionToken.prom }, '*')
   }
+
+  async storeSettings(settings: Record<string, any>): Promise<void> {
+    window.top?.postMessage({ msg: 'storeSettings', settings, token: await this.sessionToken.prom }, '*')
+  }
+  
 }
