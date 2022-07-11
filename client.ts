@@ -46,7 +46,7 @@ export class arcadeClientSDK implements ArcadeClientSDK {
     // Register listener for iframe messaging
     window.onmessage = (e) => {
       if (e.data.msg === 'settings') {
-        this.settings.resolve(JSON.parse(e.data.settings))
+        this.settings.resolve(e.data.settings)
       }
       else if (e.data.token) {
         this.sessionToken.resolve(e.data.token)
